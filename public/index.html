@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path to Manager Visualizer</title>
+    <!-- Tailwind CSS CDN - used for simplicity, for production consider PurgeCSS setup -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'], // Using Inter font
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans antialiased bg-gray-100">
+    <div id="root"></div>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script>
+        // These global variables (__app_id, __initial_auth_token) are provided by the Canvas environment.
+        // For local development or Netlify, we need to ensure they are defined.
+        // In a real production setup, __app_id might come from an environment variable.
+        // __initial_auth_token is specific to the Canvas runtime and won't exist outside it.
+        if (typeof window.__app_id === 'undefined') {
+            window.__app_id = 'netlify-dev-app-id'; // Default for local dev/Netlify if not provided
+        }
+        if (typeof window.__initial_auth_token === 'undefined') {
+            window.__initial_auth_token = null; // Set to null if not provided, so anonymous sign-in is attempted.
+        }
+    </script>
+</body>
+</html>
