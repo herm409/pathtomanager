@@ -130,26 +130,36 @@ const App = () => {
     const [loading, setLoading] = useState(true);
     const treeVisualizerContainerRef = useRef(null);
 
-    // Firebase configuration from your provided details
+    // Firebase configuration - NOW USING ENVIRONMENT VARIABLES
+    // React apps prefixed with REACT_APP_ are exposed to the browser.
     const firebaseConfig = {
-        apiKey: "AIzaSyAQTvYQLJ85ZiZArkZ4G9spiNsuKRdBWG8",
-        authDomain: "manager-factory-6adf9.firebaseapp.com",
-        projectId: "manager-factory-6adf9",
-        storageBucket: "manager-factory-6adf9.firebasestorage.app",
-        messagingSenderId: "599936305112",
-        appId: "1:599936305112:web:6ec7e826ab0559411e94ad",
-        measurementId: "G-BW8W53TDGZ"
+        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+        authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+        projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.REACT_APP_FIREBASE_APP_ID,
+        measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
     };
 
     // Initialize Firebase and Auth
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    // Only initialize if API key is present (i.e., env vars are loaded)
+    const app = firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null;
+    const db = app ? getFirestore(app) : null;
+    const auth = app ? getAuth(app) : null;
+
     // Use window.__app_id for Canvas environment, fallback for local dev
+    // For Netlify, you might also set this as a Netlify environment variable
     const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
 
     // Firebase Auth and Firestore Listener Setup
     useEffect(() => {
+        if (!auth || !db) { // Don't proceed if Firebase isn't initialized
+            console.error("Firebase not initialized. Check environment variables.");
+            setLoading(false);
+            return;
+        }
+
         const setupFirebase = async () => {
             try {
                 // Try custom token first
@@ -209,8 +219,8 @@ const App = () => {
 
     // Effect to save data to Firestore whenever orgData changes (after initial load)
     useEffect(() => {
-        // Only save if userId is available and not in initial loading phase
-        if (userId && !loading) {
+        // Only save if userId is available, not in initial loading phase, and Firebase is initialized
+        if (userId && !loading && db) {
             const saveOrgData = async () => {
                 const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/managerTrees`, 'myTree');
                 try {
@@ -299,7 +309,7 @@ const App = () => {
         // Get the clean reset state with new IDs
         const newResetData = getCleanResetOrgData();
         setOrgData(newResetData);
-        if (userId) {
+        if (userId && db) { // Ensure db is initialized before trying to write
             const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/managerTrees`, 'myTree');
             setDoc(userDocRef, { treeData: newResetData }).catch(e => console.error("Error resetting doc in Firestore:", e));
         }
