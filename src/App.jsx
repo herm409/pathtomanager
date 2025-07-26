@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'; // Removed useCallback
+import React, { useState, useEffect, useRef } from 'react';
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
@@ -92,6 +92,12 @@ const Node = ({ node, onNameChange }) => {
                         <p className="font-bold">
                             Recruits: {node.qualifiedChildrenCount || 0}/3
                         </p>
+                    </div>
+                )}
+                {/* New: Placement Guidance */}
+                {node.children && node.children.length > 0 && node.qualifiedChildrenCount === 3 && (
+                    <div className="mt-2 text-xs sm:text-sm text-blue-700 font-bold bg-blue-100 p-1 rounded-md">
+                        Switch to Manual Placement!
                     </div>
                 )}
             </div>
